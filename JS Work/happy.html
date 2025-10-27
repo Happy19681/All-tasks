@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Transport Trip Management Report</title>
+    <style>
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: #f4f6f9;
+        padding: 40px;
+        color: #333;
+      }
+
+      h2 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #2c3e50;
+      }
+
+      .form-container {
+        max-width: 700px;
+        margin: auto;
+        background: #fff;
+        padding: 20px 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .form-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 20px;
+        justify-content: center;
+      }
+
+      input[type="text"],
+      input[type="number"] {
+        padding: 10px;
+        width: 150px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 16px;
+      }
+
+      button {
+        padding: 10px 20px;
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+
+      button:hover {
+        background: #2980b9;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 30px;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+
+      th, td {
+        padding: 12px 15px;
+        text-align: center;
+        border-bottom: 1px solid #eee;
+      }
+
+      th {
+        background-color: #3498db;
+        color: white;
+      }
+
+      .completed {
+        color: green;
+        font-weight: bold;
+      }
+
+      .invalid {
+        color: red;
+        font-weight: bold;
+      }
+
+      .excellent {
+        background-color: #2ecc71;
+        color: white;
+        border-radius: 8px;
+        padding: 4px 8px;
+      }
+
+      .good {
+        background-color: #f1c40f;
+        color: black;
+        border-radius: 8px;
+        padding: 4px 8px;
+      }
+
+      .poor {
+        background-color: #e74c3c;
+        color: white;
+        border-radius: 8px;
+        padding: 4px 8px;
+      }
+
+      .long-trip {
+        background-color: #fef3bd;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>🚛 Transport Trip Report</h2>
+    <div class="form-container">
+      <form onsubmit="adddetails(event)">
+        <div class="form-group">
+          <input type="text" id="name" placeholder="Driver's Name" required />
+          <input type="text" id="vehicle" placeholder="Vehicle Type" required />
+          <input type="text" id="depart" placeholder="Departure Location" required />
+          <input type="text" id="destination" placeholder="Destination" required />
+          <input type="number" id="distance" placeholder="Distance (km)" required />
+          <input type="number" id="fuel" placeholder="Fuel Used (L)" required />
+          <input type="number" id="fuelcost" placeholder="Cost per Liter" required />
+          <input type="number" id="tripduration" placeholder="Trip Duration (hrs)" required />
+          <input type="number" id="passengers" placeholder="Passengers/Cargo" required />
+        </div>
+        <div style="text-align: center">
+          <button type="submit">Add Report</button>
+        </div>
+      </form>
+    </div>
+
+    <table id="reportTable">
+      <thead>
+        <tr>
+          <th>Driver Name</th>
+          <th>Vehicle Type</th>
+          <th>From → To</th>
+          <th>Distance (km)</th>
+          <th>Fuel Used (L)</th>
+          <th>Fuel Cost ($)</th>
+          <th>Efficiency</th>
+          <th>Duration (hrs)</th>
+          <th>Passengers/Cargo</th>
+          <th>Trip Status</th>
+          <th>Remarks</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <script>
+      function adddetails(event) {
+        event.preventDefault();
+
+        const name = document.getElementById("name").value;
+        const vehicle = document.getElementById("vehicle").value;
+        const depart = document.getElementById("depart").value;
+        const destination = document.getElementById("destination").value;
+        const distance = parseFloat(document.getElementById("distance").value);
+        const fuel = parseFloat(document.getElementById("fuel").value);
+        const fuelcost = parseFloat(document.getElementById("fuelcost").value);
+        const duration = parseFloat(document.getElementById("tripduration").value);
+        const passengers = parseFloat(document.getElementById("passengers").value);
+
+        const totalCost = fuel * fuelcost;
+        const fuelPerKm = fuel / distance;
+
+        let efficiency = "";
+        let efficiencyClass = "";
+
+        if (fuelPerKm < 0.05) {
+          efficiency = "Excellent";
+          efficiencyClass = "excellent";
+        } else if (fuelPerKm < 0.08) {
+          efficiency = "Good";
+          efficiencyClass = "good";
+        } else {
+          efficiency = "Poor";
+          efficiencyClass = "poor";
+        }
+
+        let status = "";
+        let statusClass = "";
+        if (distance > 0 && fuel > 0) {
+          status = "Completed";
+          statusClass = "completed";
+        } else {
+          status = "Invalid Data";
+          statusClass = "invalid";
+        }
+
+        let remarks = duration > 10 ? "Long Trip" : "Normal Trip";
+        let remarksClass = duration > 10 ? "long-trip" : "";
+
+        const table = document.getElementById("reportTable").getElementsByTagName("tbody")[0];
+        const newRow = table.insertRow();
+        newRow.className = remarksClass;
+
+        newRow.innerHTML = `
+          <td>${name}</td>
+          <td>${vehicle}</td>
+          <td>${depart} → ${destination}</td>
+          <td>${distance}</td>
+          <td>${fuel}</td>
+          <td>$${totalCost.toFixed(2)}</td>
+          <td><span class="${efficiencyClass}">${efficiency}</span></td>
+          <td>${duration}</td>
+          <td>${passengers}</td>
+          <td class="${statusClass}">${status}</td>
+          <td>${remarks}</td>
+        `;
+
+        event.target.reset();
+      }
+    </script>
+  </body>
+</html>
